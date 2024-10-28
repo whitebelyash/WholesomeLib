@@ -2,6 +2,7 @@ package ru.whbex.lib.collections;
 
 import java.util.Collections;
 import java.util.List;
+// Source: [Clans] ru.whbex.develop.clans.common.misc
 /* Paginated list viewer */
 // TODO: Improve docs
 public class PagedListView<E> {
