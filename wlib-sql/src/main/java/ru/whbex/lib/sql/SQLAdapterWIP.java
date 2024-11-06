@@ -11,8 +11,8 @@ import java.util.function.Consumer;
 
 // TODO: Rename to SQLAdapter and switch everything to it.
 // Keeping old SQLAdapter for compatibility purposes
-public class SQLAdapterWIP {
-    public class Executor {
+public final class SQLAdapterWIP {
+    public final class Executor {
         private final SQLAdapterWIP inst = SQLAdapterWIP.this;
         private Consumer<SQLAdapterWIP> task;
         private ExecutorService eserv;
