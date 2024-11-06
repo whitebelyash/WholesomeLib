@@ -11,43 +11,94 @@ import java.util.function.Consumer;
 
 // TODO: Rename to SQLAdapter and switch everything to it.
 // Keeping old SQLAdapter for compatibility purposes
+
+/**
+ * SQLAdapter. Simplifies access to SQL databases
+ */
 public final class SQLAdapterWIP {
     public final class Executor {
         private final SQLAdapterWIP inst = SQLAdapterWIP.this;
         private Consumer<SQLAdapterWIP> task;
         private ExecutorService eserv;
+
+        /**
+         * Task to execute on SQLAdapter
+         * @param task Task. See available method references
+         * @return Executor instance (chain)
+         */
         private Executor task(Consumer<SQLAdapterWIP> task){
             this.task = task;
             return this;
         }
+
+        /**
+         * SQL Statement to execute on SQLAdapter
+         * @param sql SQL Statement string
+         * @return Executor instance (chain)
+         */
         public Executor sql(String sql){
             inst.sql = sql;
             return this;
         }
+
+        /**
+         * Task to execute on SQLAdapter exception
+         * @param except Task
+         * @return Executor instance (chain)
+         */
         public Executor exceptionally(Consumer<SQLException> except){
             inst.except = except;
             return this;
         }
+
+        /**
+         * Query callback. Will be executed on query complete, ResultSet close is managed on SQLAdapter side, don't close
+         * @param callback callback
+         * @return Executor instance (chain)
+         */
         public Executor queryCallback(SQLCallback<ResultSet> callback){
             inst.queryCallback = callback;
             return this;
         }
+        /**
+         * Update callback. Will be executed on update complete
+         * @param callback callback
+         * @return Executor instance (chain)
+         */
         public Executor updateCallback(SQLCallback<Integer> callback){
             inst.updateCallback = callback;
             return this;
         }
+        /**
+         * PreparedStatement value setter
+         * @param ps PreparedStatement callback
+         * @return Executor instance (chain)
+         */
         public Executor setPrepared(SQLCallback<PreparedStatement> ps){
             inst.valueSetter = ps;
             return this;
         }
+        /**
+         * Executor service for executeAsync()
+         * @param es executor service instance
+         * @return Executor instance (chain)
+         */
         public Executor executorService(ExecutorService es){
             this.eserv = es;
             return this;
         }
 
+        /**
+         * Execute task on SQLAdapter
+         */
         public void execute(){
             task.accept(inst);
         }
+
+        /**
+         * Execute task on SQLAdapter asynchronously
+         * @return Future object of task or null if ExecutorService isn't provided.
+         */
         public Future<Void> executeAsync(){
             if(eserv != null)
                 return eserv.submit(() -> {execute(); return null;});
@@ -63,6 +114,13 @@ public final class SQLAdapterWIP {
     private SQLAdapterWIP(ConnectionProvider provider){
         this.prov = provider;
     }
+
+    /**
+     * Get executor chain.
+     * @param provider Connection provider
+     * @param task Task to execute on SQLAdapter. See available method references
+     * @return Executor instance
+     */
     public static Executor executor(ConnectionProvider provider, Consumer<SQLAdapterWIP> task){
         return new SQLAdapterWIP(provider)
                 .newExecutor()
@@ -74,6 +132,9 @@ public final class SQLAdapterWIP {
 
     }
 
+    /**
+     * Execute query on SQLAdapter
+     */
     public void query() {
         try {
             query(prov, sql, queryCallback);
@@ -82,6 +143,10 @@ public final class SQLAdapterWIP {
                 except.accept(e);
         }
     }
+
+    /**
+     * Execute query with PreparedStatement on SQLAdapter
+     */
     public void preparedQuery() {
         try {
             preparedQuery(prov, sql, valueSetter, queryCallback);
@@ -90,6 +155,10 @@ public final class SQLAdapterWIP {
                 except.accept(e);
         }
     }
+
+    /**
+     * Execute update on SQLAdapter
+     */
     public void update() {
         try {
             update(prov, sql, updateCallback);
@@ -98,6 +167,10 @@ public final class SQLAdapterWIP {
                 except.accept(e);
         }
     }
+
+    /**
+     * Execute update with PreparedStatement on SQLAdapter
+     */
     public void preparedUpdate(){
         try {
             preparedUpdate(prov, sql, valueSetter, updateCallback);
@@ -107,6 +180,12 @@ public final class SQLAdapterWIP {
         }
     }
 
+    /**
+     * Execute query on SQLAdapter.
+     * @param provider Connection provider
+     * @param sql SQL Statement string
+     * @param callback Query callback
+     */
     public static void query(ConnectionProvider provider, String sql, SQLCallback<ResultSet> callback) throws SQLException {
         Connection conn = provider.getConnection();
         // formatting shit
@@ -118,6 +197,13 @@ public final class SQLAdapterWIP {
             throw new SQLException(e);
         }
     }
+    /**
+     * Execute query with PreparedStatement on SQLAdapter.
+     * @param provider Connection provider
+     * @param sql SQL Statement string
+     * @param callback Query callback
+     * @param setter Value setter callback
+     */
     public static void preparedQuery(ConnectionProvider provider, String sql, SQLCallback<PreparedStatement> setter, SQLCallback<ResultSet> callback) throws SQLException {
         Connection conn = provider.getConnection();
         try(PreparedStatement ps = conn.prepareStatement(sql)){
@@ -130,6 +216,12 @@ public final class SQLAdapterWIP {
             throw new SQLException(e);
         }
     }
+    /**
+     * Execute update on SQLAdapter.
+     * @param provider Connection provider
+     * @param sql SQL Statement string
+     * @param callback Update callback
+     */
     public static void update(ConnectionProvider provider, String sql, SQLCallback<Integer> callback) throws SQLException {
         Connection conn = provider.getConnection();
         try(Statement s = conn.createStatement()){
@@ -139,6 +231,13 @@ public final class SQLAdapterWIP {
             throw new SQLException(e);
         }
     }
+    /**
+     * Execute update with PreparedStatement on SQLAdapter.
+     * @param provider Connection provider
+     * @param sql SQL Statement string
+     * @param callback Update callback
+     * @param setter Value setter callback
+     */
     public static void preparedUpdate(ConnectionProvider provider, String sql, SQLCallback<PreparedStatement> setter, SQLCallback<Integer> callback) throws SQLException {
         Connection conn = provider.getConnection();
         try(PreparedStatement ps = conn.prepareStatement(sql)){
