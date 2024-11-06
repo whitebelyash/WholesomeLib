@@ -56,7 +56,7 @@ public final class SQLAdapterWIP {
          * @param callback callback
          * @return Executor instance (chain)
          */
-        public Executor queryCallback(SQLCallback<ResultSet> callback){
+        public Executor queryCallback(SQLCallback<SQLResponse> callback){
             inst.queryCallback = callback;
             return this;
         }
@@ -65,7 +65,7 @@ public final class SQLAdapterWIP {
          * @param callback callback
          * @return Executor instance (chain)
          */
-        public Executor updateCallback(SQLCallback<Integer> callback){
+        public Executor updateCallback(SQLCallback<SQLResponse> callback){
             inst.updateCallback = callback;
             return this;
         }
@@ -97,7 +97,7 @@ public final class SQLAdapterWIP {
 
         /**
          * Execute task on SQLAdapter asynchronously
-         * @return Future object of task or null if ExecutorService isn't provided.
+         * @return Future object of task or null if ExecutorService wasn't provided.
          */
         public Future<Void> executeAsync(){
             if(eserv != null)
@@ -107,8 +107,8 @@ public final class SQLAdapterWIP {
     }
     private final ConnectionProvider prov;
     private String sql;
-    private SQLCallback<ResultSet> queryCallback;
-    private SQLCallback<Integer> updateCallback;
+    private SQLCallback<SQLResponse> queryCallback;
+    private SQLCallback<SQLResponse> updateCallback;
     private SQLCallback<PreparedStatement> valueSetter;
     private Consumer<SQLException> except;
     private SQLAdapterWIP(ConnectionProvider provider){
@@ -186,12 +186,12 @@ public final class SQLAdapterWIP {
      * @param sql SQL Statement string
      * @param callback Query callback. Will be executed on query complete, ResultSet is managed on SQLAdapter side, don't close
      */
-    public static void query(ConnectionProvider provider, String sql, SQLCallback<ResultSet> callback) throws SQLException {
+    public static void query(ConnectionProvider provider, String sql, SQLCallback<SQLResponse> callback) throws SQLException {
         Connection conn = provider.getConnection();
         // formatting shit
         // AFAIK closing statement will close resultset automatically
         try(Statement s = conn.createStatement()){
-            callback.execute(s.executeQuery(sql));
+            callback.execute(new SQLResponse(s.executeQuery(sql), -1, null));
         } catch (SQLException e){
             handleException(e);
             throw new SQLException(e);
@@ -204,13 +204,13 @@ public final class SQLAdapterWIP {
      * @param callback Query callback. Will be executed on query complete, ResultSet is managed on SQLAdapter side, don't close
      * @param setter Value setter callback
      */
-    public static void preparedQuery(ConnectionProvider provider, String sql, SQLCallback<PreparedStatement> setter, SQLCallback<ResultSet> callback) throws SQLException {
+    public static void preparedQuery(ConnectionProvider provider, String sql, SQLCallback<PreparedStatement> setter, SQLCallback<SQLResponse> callback) throws SQLException {
         Connection conn = provider.getConnection();
         try(PreparedStatement ps = conn.prepareStatement(sql)){
             // set all values
             setter.execute(ps);
             // dispatch query
-            callback.execute(ps.executeQuery());
+            callback.execute(new SQLResponse(ps.executeQuery(), -1, null));
         } catch (SQLException e){
             handleException(e);
             throw new SQLException(e);
@@ -220,12 +220,12 @@ public final class SQLAdapterWIP {
      * Execute update on SQLAdapter.
      * @param provider Connection provider
      * @param sql SQL Statement string
-     * @param callback Update callback. Will be executed on query complete, ResultSet is managed on SQLAdapter side, don't close
+     * @param callback Update callback. Will be executed on update complete.
      */
-    public static void update(ConnectionProvider provider, String sql, SQLCallback<Integer> callback) throws SQLException {
+    public static void update(ConnectionProvider provider, String sql, SQLCallback<SQLResponse> callback) throws SQLException {
         Connection conn = provider.getConnection();
         try(Statement s = conn.createStatement()){
-            callback.execute(s.executeUpdate(sql));
+            callback.execute(new SQLResponse(null, s.executeUpdate(sql), null));
         } catch (SQLException e){
             handleException(e);
             throw new SQLException(e);
@@ -235,14 +235,14 @@ public final class SQLAdapterWIP {
      * Execute update with PreparedStatement on SQLAdapter.
      * @param provider Connection provider
      * @param sql SQL Statement string
-     * @param callback Update callback. Will be executed on query complete, ResultSet is managed on SQLAdapter side, don't close
+     * @param callback Update callback. Will be executed on query complete.
      * @param setter Value setter callback
      */
-    public static void preparedUpdate(ConnectionProvider provider, String sql, SQLCallback<PreparedStatement> setter, SQLCallback<Integer> callback) throws SQLException {
+    public static void preparedUpdate(ConnectionProvider provider, String sql, SQLCallback<PreparedStatement> setter, SQLCallback<SQLResponse> callback) throws SQLException {
         Connection conn = provider.getConnection();
         try(PreparedStatement ps = conn.prepareStatement(sql)){
             setter.execute(ps);
-            callback.execute(ps.executeUpdate());
+            callback.execute(new SQLResponse(null, ps.executeUpdate(), null));
         } catch (SQLException e){
             handleException(e);
             throw new SQLException(e);
