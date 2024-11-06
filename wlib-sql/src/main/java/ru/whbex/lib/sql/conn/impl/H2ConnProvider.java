@@ -35,8 +35,7 @@ public class H2ConnProvider implements ConnectionProvider {
 
     @Override
     public Connection newConnection() throws SQLException {
-        if(conn != null && !conn.isClosed())
-            conn.close();
+        breakConnection();
         conn = DriverManager.getConnection(ConnectionProvider.JDBC_PREFIX + "h2:" + db.getAbsolutePath());
         return conn;
     }
