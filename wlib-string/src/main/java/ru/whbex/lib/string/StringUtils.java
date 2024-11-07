@@ -7,6 +7,13 @@ import java.util.UUID;
 
 public class StringUtils {
 
+    /**
+     * Format string with {arg_number} placeholder.
+     * Example: simpleformat("Hello, {0}!", "world") -> Hello, world!
+     * @param base string format
+     * @param args arguments
+     * @return formatted string
+     */
     public static String simpleformat(String base, Object... args){
         if(args.length < 1)
             return base;
@@ -22,7 +29,12 @@ public class StringUtils {
         }
         return sb.toString();
     }
-    /* Safe string to uuid converter */
+
+    /**
+     * String to UUID convert
+     * @param uuid UUID as string
+     * @return UUID or null if uuid string is invalid
+     */
     public static UUID UUIDFromString(String uuid){
         UUID id;
         try {
@@ -32,7 +44,13 @@ public class StringUtils {
         }
         return id;
     }
-    /* Unix epoch to date string converter */
+
+    /**
+     * Convert epoch milliseconds to string date
+     * @param format date format. Will be silently ignored if format is invalid
+     * @param epoch unix epoch in ms (milliseconds passed from 1970.01.01 00:00, see System#currentTimeMillis)
+     * @return formatted date string
+     */
     public static String epochAsString(String format, long epoch){
         Date date = new Date(epoch);
         try {
