@@ -42,6 +42,14 @@ public final class SQLAdapter {
         }
 
         /**
+         * Set verbosity status. When true - will log failed operations.
+         * @param verbose status
+         */
+        public void setVerbose(boolean verbose){
+            inst.verbose = verbose;
+        }
+
+        /**
          * Task to execute on SQLAdapter exception
          * @param except Task
          * @return Executor instance (chain)
@@ -120,6 +128,7 @@ public final class SQLAdapter {
     }
     private final ConnectionProvider prov;
     private String sql;
+    private boolean verbose = true;
     private SQLCallback<SQLResponse> queryCallback;
     private SQLCallback<SQLResponse> updateCallback;
     private SQLCallback<PreparedStatement> valueSetter;
@@ -151,7 +160,7 @@ public final class SQLAdapter {
      */
     public void query() {
         try {
-            query(prov, sql, queryCallback);
+            query(prov, sql, queryCallback, verbose);
         } catch (SQLException e) {
             if(except != null)
                 except.accept(e);
@@ -163,7 +172,7 @@ public final class SQLAdapter {
      */
     public void preparedQuery() {
         try {
-            preparedQuery(prov, sql, valueSetter, queryCallback);
+            preparedQuery(prov, sql, valueSetter, queryCallback, verbose);
         } catch (SQLException e) {
             if(except != null)
                 except.accept(e);
@@ -175,7 +184,7 @@ public final class SQLAdapter {
      */
     public void update() {
         try {
-            update(prov, sql, updateCallback);
+            update(prov, sql, updateCallback, verbose);
         } catch (SQLException e) {
             if(except != null)
                 except.accept(e);
@@ -200,7 +209,7 @@ public final class SQLAdapter {
                         return true;
                     } :
                     valueSetter;
-            preparedUpdate(prov, sql, valueSetter, updateCallback, batch);
+            preparedUpdate(prov, sql, valueSetter, updateCallback, batch, verbose);
         } catch (SQLException e) {
             if(except != null)
                 except.accept(e);
@@ -212,15 +221,17 @@ public final class SQLAdapter {
      * @param provider Connection provider
      * @param sql SQL Statement string
      * @param callback Query callback. Will be executed on query complete, ResultSet is managed on SQLAdapter side, don't close
+     * @param verbose log failed database execution (will forward exception anyway)
      */
-    public static void query(ConnectionProvider provider, String sql, SQLCallback<SQLResponse> callback) throws SQLException {
+    public static void query(ConnectionProvider provider, String sql, SQLCallback<SQLResponse> callback, boolean verbose) throws SQLException {
         Connection conn = provider.getConnection();
         // formatting shit
         // AFAIK closing statement will close resultset automatically
         try(Statement s = conn.createStatement()){
             callback.execute(new SQLResponse(s.executeQuery(sql), -1, null));
         } catch (SQLException e){
-            handleException(e);
+            if(verbose)
+                handleException(e);
             throw new SQLException(e);
         }
     }
@@ -230,8 +241,9 @@ public final class SQLAdapter {
      * @param sql SQL Statement string
      * @param callback Query callback. Will be executed on query complete, ResultSet is managed on SQLAdapter side, don't close
      * @param setter Value setter callback
+     * @param verbose log failed database execution (will forward exception anyway)
      */
-    public static void preparedQuery(ConnectionProvider provider, String sql, SQLCallback<PreparedStatement> setter, SQLCallback<SQLResponse> callback) throws SQLException {
+    public static void preparedQuery(ConnectionProvider provider, String sql, SQLCallback<PreparedStatement> setter, SQLCallback<SQLResponse> callback, boolean verbose) throws SQLException {
         Connection conn = provider.getConnection();
         try(PreparedStatement ps = conn.prepareStatement(sql)){
             // set all values
@@ -239,7 +251,8 @@ public final class SQLAdapter {
             // dispatch query
             callback.execute(new SQLResponse(ps.executeQuery(), -1, null));
         } catch (SQLException e){
-            handleException(e);
+            if(verbose)
+                handleException(e);
             throw new SQLException(e);
         }
     }
@@ -248,13 +261,15 @@ public final class SQLAdapter {
      * @param provider Connection provider
      * @param sql SQL Statement string
      * @param callback Update callback. Will be executed on update complete.
+     * @param verbose log failed database execution (will forward exception anyway)
      */
-    public static void update(ConnectionProvider provider, String sql, SQLCallback<SQLResponse> callback) throws SQLException {
+    public static void update(ConnectionProvider provider, String sql, SQLCallback<SQLResponse> callback, boolean verbose) throws SQLException {
         Connection conn = provider.getConnection();
         try(Statement s = conn.createStatement()){
             callback.execute(new SQLResponse(null, s.executeUpdate(sql), null));
         } catch (SQLException e){
-            handleException(e);
+            if(verbose)
+                handleException(e);
             throw new SQLException(e);
         }
     }
@@ -265,8 +280,9 @@ public final class SQLAdapter {
      * @param callback Update callback. Will be executed on query complete.
      * @param setter Value setter callback
      * @param batch enable batched update
+     * @param verbose log failed database execution (will forward exception anyway)
      */
-    public static void preparedUpdate(ConnectionProvider provider, String sql, SQLCallback<PreparedStatement> setter, SQLCallback<SQLResponse> callback, boolean batch) throws SQLException {
+    public static void preparedUpdate(ConnectionProvider provider, String sql, SQLCallback<PreparedStatement> setter, SQLCallback<SQLResponse> callback, boolean batch, boolean verbose) throws SQLException {
         Connection conn = provider.getConnection();
         try(PreparedStatement ps = conn.prepareStatement(sql)){
             setter.execute(ps);
@@ -274,7 +290,8 @@ public final class SQLAdapter {
                     new SQLResponse(null, -1, ps.executeBatch()) :
                     new SQLResponse(null, ps.executeUpdate(), null));
         } catch (SQLException e){
-            handleException(e);
+            if(verbose)
+                handleException(e);
             throw new SQLException(e);
         }
     }
