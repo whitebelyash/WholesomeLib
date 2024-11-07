@@ -231,7 +231,7 @@ public final class SQLAdapter {
             callback.execute(new SQLResponse(s.executeQuery(sql), -1, null));
         } catch (SQLException e){
             if(verbose)
-                handleException(e);
+                handleException(e, sql, provider);
             throw new SQLException(e);
         }
     }
@@ -252,7 +252,7 @@ public final class SQLAdapter {
             callback.execute(new SQLResponse(ps.executeQuery(), -1, null));
         } catch (SQLException e){
             if(verbose)
-                handleException(e);
+                handleException(e, sql, provider);
             throw new SQLException(e);
         }
     }
@@ -269,7 +269,7 @@ public final class SQLAdapter {
             callback.execute(new SQLResponse(null, s.executeUpdate(sql), null));
         } catch (SQLException e){
             if(verbose)
-                handleException(e);
+                handleException(e, sql, provider);
             throw new SQLException(e);
         }
     }
@@ -291,16 +291,17 @@ public final class SQLAdapter {
                     new SQLResponse(null, ps.executeUpdate(), null));
         } catch (SQLException e){
             if(verbose)
-                handleException(e);
+                handleException(e, sql, provider);
             throw new SQLException(e);
         }
     }
 
-    private static void handleException(SQLException e){
-        LogContext.log(Level.ERROR, "!!! Failed to execute SQL query/update !!!");
+    private static void handleException(SQLException e, String sql, ConnectionProvider prov){
+        LogContext.log(Level.ERROR, "=== Failed to execute SQL query/update! ===");
         LogContext.log(Level.ERROR, "Message: {0}", e.getLocalizedMessage());
-        LogContext.log(Level.ERROR, "SQL State: {0}", e.getSQLState());
-        LogContext.log(Level.ERROR, "!!! !!!");
+        LogContext.log(Level.ERROR, "SQL Statement: {0}", sql);
+        LogContext.log(Level.ERROR, "ConnectionProvider config: {0}", prov);
+        LogContext.log(Level.ERROR, "=== !!! ===");
     }
 
 }
