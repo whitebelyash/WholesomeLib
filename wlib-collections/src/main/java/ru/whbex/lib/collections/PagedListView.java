@@ -3,7 +3,11 @@ package ru.whbex.lib.collections;
 import java.util.Collections;
 import java.util.List;
 // Source: [Clans] ru.whbex.develop.clans.common.misc
-/* Paginated list viewer */
+
+/**
+ * Paginated list viewer
+ * @param <E> list element type
+ */
 // TODO: Improve docs
 public class PagedListView<E> {
     private final static short PAGE_SIZE = 10;

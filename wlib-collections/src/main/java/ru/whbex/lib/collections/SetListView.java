@@ -7,6 +7,11 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 // Source: [IDontKnow] ru.whbex.develop.idontknow.util
+
+/**
+ * Read only view of Set as List object.
+ * @param <T> List element type
+ */
 public class SetListView<T> implements List<T> {
     private final Set<T> set;
     public SetListView(Set<T> set){
