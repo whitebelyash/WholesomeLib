@@ -11,14 +11,28 @@ public class LogContext {
     /* Use stub logger if not provided */
     private static Logger logger = LoggerFactory.getLogger(LogContext.class);
 
+    /**
+     * Set global logger
+     * @param l SLF4J Logger
+     */
     public static void provideLogger(Logger l){
         logger = l;
     }
+
+    /**
+     * Get global logger
+     * @return SLF4J Logger
+     */
     public static Logger getLogger(){
         return logger;
     }
 
 
+    /**
+     * Log message to LogContext global logger (SLF4J)
+     * @param level Log level
+     * @param message Message
+     */
     public static void log(Level level, String message){
         switch(level){
             case INFO -> logger.info(message);
@@ -28,6 +42,12 @@ public class LogContext {
             case TRACE -> logger.trace(message);
         }
     }
+    /**
+     * Log message to LogContext global logger (SLF4J) with args. Uses StringUtils#simpleformat (see wlib-string) underhood.
+     * @param level Log level
+     * @param message Message base message (format)
+     * @param args format args
+     */
     public static void log(Level level, String message, Object... args){
         switch(level){
             case INFO -> logger.info(StringUtils.simpleformat(message, args));
