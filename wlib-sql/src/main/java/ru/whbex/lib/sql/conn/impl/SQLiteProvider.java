@@ -12,11 +12,11 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 // copy of H2ConnProvider
-public class SQLiteConnProvider implements ConnectionProvider {
+public class SQLiteProvider implements ConnectionProvider {
     private final ConnectionConfig conf;
     private Connection conn;
     private final File db;
-    public SQLiteConnProvider(ConnectionConfig config) throws ClassNotFoundException, IOException {
+    public SQLiteProvider(ConnectionConfig config) throws ClassNotFoundException, IOException {
         this.conf = config;
         // Do not initialize if H2 not present in the classpath
         Class.forName("org.sqlite.JDBC");
