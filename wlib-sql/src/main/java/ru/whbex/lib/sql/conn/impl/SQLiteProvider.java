@@ -55,4 +55,16 @@ public class SQLiteProvider implements ConnectionProvider {
         }
         // Do nothing if already broken
     }
+
+    @Override
+    public ConnectionConfig getConfig() {
+        return conf;
+    }
+
+    @Override
+    public String toString() {
+        return "SQLiteProvider{" +
+                "conf=" + conf +
+                '}';
+    }
 }

@@ -22,4 +22,12 @@ public interface ConnectionProvider {
      * @throws SQLException if connection close throws SQLException
      */
     void breakConnection() throws SQLException;
+
+    /**
+     * Get this provider's connection config
+     * @return configuration
+     */
+    ConnectionConfig getConfig();
+
+
 }
