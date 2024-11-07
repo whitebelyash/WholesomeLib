@@ -10,7 +10,7 @@ import java.util.Locale;
 import java.util.Map;
 
 public class Language {
-    private final LangFile file;
+    private final LanguageFile file;
 
     private String name;
     private String nameLocalized;
@@ -18,7 +18,7 @@ public class Language {
 
     private final Map<String, String> phrases = new HashMap<>();
 
-    public Language(LangFile file){
+    public Language(LanguageFile file){
         try {
             file.open();
         } catch (IOException e) {

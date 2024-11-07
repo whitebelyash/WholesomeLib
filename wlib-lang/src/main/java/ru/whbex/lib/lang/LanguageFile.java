@@ -17,7 +17,7 @@ import java.io.IOException;
  * TODO: spaces between separator
  * TODO: Unit tests?
  */
-public final class LangFile {
+public final class LanguageFile {
 
 
     private final File file;
@@ -26,7 +26,7 @@ public final class LangFile {
     private boolean open = false;
     private int pos = -1;
     private boolean empty = false;
-    public LangFile(File file) {
+    public LanguageFile(File file) {
         LogDebug.print("Creating language file at {0}", file.getAbsolutePath());
         this.empty = !file.exists();
         this.file = file;
