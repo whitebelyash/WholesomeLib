@@ -18,12 +18,12 @@ public class Main {
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         long s = System.currentTimeMillis();
         ConnectionProvider provider = new H2ConnProvider(config);
-        v2SQLAdapter.executor(provider, v2SQLAdapter::update)
+        SQLAdapter.executor(provider, SQLAdapter::update)
                 .sql("CREATE TABLE IF NOT EXISTS test(id INT, name varchar(12));")
                 .updateCallback(i -> {System.out.printf("aff rows: %d\n", i.updateResult()); return true;})
                 .exceptionally(e -> {throw new RuntimeException(e);})
                 .execute();
-        v2SQLAdapter.executor(provider, v2SQLAdapter::preparedUpdate)
+        SQLAdapter.executor(provider, SQLAdapter::preparedUpdate)
                 .sql("INSERT INTO test VALUES (?, ?);")
                 .setPrepared(ps -> {
                     ps.setInt(1, 1);
@@ -33,7 +33,7 @@ public class Main {
                 .updateCallback(i -> {System.out.printf("aff rows upd: %d\n", i.updateResult()); return true;})
                 .exceptionally(e -> {throw new RuntimeException(e);})
                 .execute();
-        v2SQLAdapter.executor(provider, v2SQLAdapter::query)
+        SQLAdapter.executor(provider, SQLAdapter::query)
                 .sql("SELECT * FROM test")
                 .queryCallback(rs -> {
                     // do something
