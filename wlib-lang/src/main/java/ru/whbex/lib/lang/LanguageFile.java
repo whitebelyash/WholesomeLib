@@ -1,7 +1,7 @@
 package ru.whbex.lib.lang;
 
 
-import ru.whbex.lib.log.LogDebug;
+import ru.whbex.lib.log.Debug;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -27,7 +27,7 @@ public final class LanguageFile {
     private int pos = -1;
     private boolean empty = false;
     public LanguageFile(File file) {
-        LogDebug.print("Creating language file at {0}", file.getAbsolutePath());
+        Debug.print("Creating language file at {0}", file.getAbsolutePath());
         this.empty = !file.exists();
         this.file = file;
     }

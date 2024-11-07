@@ -2,7 +2,7 @@ package ru.whbex.lib.sql;
 
 import org.slf4j.event.Level;
 import ru.whbex.lib.log.LogContext;
-import ru.whbex.lib.log.LogDebug;
+import ru.whbex.lib.log.Debug;
 import ru.whbex.lib.sql.conn.ConnectionProvider;
 
 import java.sql.*;
@@ -196,7 +196,7 @@ public final class SQLAdapter {
      */
     public void preparedUpdate(){
         try {
-            LogDebug.print("update is batched!");
+            Debug.print("update is batched!");
             boolean batch = valueSetters != null && !valueSetters.isEmpty();
             SQLCallback<PreparedStatement> p = batch ?
                     ps -> {

@@ -2,7 +2,7 @@ package ru.whbex.lib.lang;
 
 import org.slf4j.event.Level;
 import ru.whbex.lib.log.LogContext;
-import ru.whbex.lib.log.LogDebug;
+import ru.whbex.lib.log.Debug;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -39,12 +39,12 @@ public class Language {
         } catch (Exception e) {
             LogContext.log(Level.ERROR, "Failed reading LangFile {0} at {1} line", file.getFile().getName(), file.getPosition());
         }
-        LogDebug.print("Loaded Language at {0}. Will load metadata now", file.toString());
+        Debug.print("Loaded Language at {0}. Will load metadata now", file.toString());
         this.loadMetadata();
         try {
             file.close();
         } catch (IOException e) {
-            LogDebug.print("Failed to close LangFile {0}!", file.toString());
+            Debug.print("Failed to close LangFile {0}!", file.toString());
         }
     }
 

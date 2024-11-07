@@ -2,8 +2,9 @@ package ru.whbex.lib.log;
 
 import ru.whbex.lib.string.StringUtils;
 
-public class LogDebug {
-    public static final boolean DEBUG = true;
+public class Debug {
+    // May add runtime changing in the future
+    private static boolean DEBUG = Boolean.parseBoolean(System.getProperty("whbex.debug"));
     public static void print(String m, Object... args){
         if(!DEBUG)
             return;
@@ -16,5 +17,8 @@ public class LogDebug {
     public static void dbg_printStacktrace(Throwable t){
         if(DEBUG)
             t.printStackTrace();
+    }
+    public static boolean isDebugEnv(){
+        return DEBUG;
     }
 }
