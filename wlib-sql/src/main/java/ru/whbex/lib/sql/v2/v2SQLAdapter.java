@@ -2,6 +2,7 @@ package ru.whbex.lib.sql.v2;
 
 import org.slf4j.event.Level;
 import ru.whbex.lib.log.LogContext;
+import ru.whbex.lib.log.LogDebug;
 import ru.whbex.lib.sql.SQLCallback;
 import ru.whbex.lib.sql.SQLResponse;
 import ru.whbex.lib.sql.v2.conn.ConnectionProvider;
@@ -17,12 +18,12 @@ import java.util.function.Consumer;
 // Keeping old SQLAdapter for compatibility purposes
 
 /**
- * SQLAdapter. Simplifies access to SQL databases
+ * SQLAdapter. Single method SQL database access.
  */
-public final class SQLAdapterWIP {
+public final class v2SQLAdapter {
     public final class Executor {
-        private final SQLAdapterWIP inst = SQLAdapterWIP.this;
-        private Consumer<SQLAdapterWIP> task;
+        private final v2SQLAdapter inst = v2SQLAdapter.this;
+        private Consumer<v2SQLAdapter> task;
         private ExecutorService eserv;
 
         /**
@@ -30,7 +31,7 @@ public final class SQLAdapterWIP {
          * @param task Task. See available method references
          * @return Executor instance (chain)
          */
-        private Executor task(Consumer<SQLAdapterWIP> task){
+        private Executor task(Consumer<v2SQLAdapter> task){
             this.task = task;
             return this;
         }
@@ -129,7 +130,7 @@ public final class SQLAdapterWIP {
     private SQLCallback<PreparedStatement> valueSetter;
     private List<SQLCallback<PreparedStatement>> valueSetters;
     private Consumer<SQLException> except;
-    private SQLAdapterWIP(ConnectionProvider provider){
+    private v2SQLAdapter(ConnectionProvider provider){
         this.prov = provider;
     }
 
@@ -139,8 +140,8 @@ public final class SQLAdapterWIP {
      * @param task Task to execute on SQLAdapter. See available method references
      * @return Executor instance
      */
-    public static Executor executor(ConnectionProvider provider, Consumer<SQLAdapterWIP> task){
-        return new SQLAdapterWIP(provider)
+    public static Executor executor(ConnectionProvider provider, Consumer<v2SQLAdapter> task){
+        return new v2SQLAdapter(provider)
                 .newExecutor()
                 .task(task);
 
@@ -191,8 +192,20 @@ public final class SQLAdapterWIP {
      */
     public void preparedUpdate(){
         try {
-            boolean batch = valueSetters
-            preparedUpdate(prov, sql, valueSetter, updateCallback);
+            LogDebug.print("update is batched!");
+            boolean batch = valueSetters != null && !valueSetters.isEmpty();
+            SQLCallback<PreparedStatement> p = batch ?
+                    ps -> {
+                        valueSetter.execute(ps);
+                        ps.addBatch();
+                        for (SQLCallback<PreparedStatement> sc : valueSetters) {
+                            sc.execute(ps);
+                            ps.addBatch();
+                        }
+                        return true;
+                    } :
+                    valueSetter;
+            preparedUpdate(prov, sql, valueSetter, updateCallback, batch);
         } catch (SQLException e) {
             if(except != null)
                 except.accept(e);
