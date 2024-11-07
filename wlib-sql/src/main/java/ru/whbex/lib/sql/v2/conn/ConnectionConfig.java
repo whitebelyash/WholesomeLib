@@ -1,4 +1,4 @@
-package ru.whbex.lib.sql.conn;
+package ru.whbex.lib.sql.v2.conn;
 
 // ConnectionData
 

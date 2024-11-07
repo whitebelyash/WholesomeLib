@@ -1,4 +1,4 @@
-package ru.whbex.lib.sql.conn;
+package ru.whbex.lib.sql.v2.conn;
 
 import java.sql.Connection;
 import java.sql.SQLException;

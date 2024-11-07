@@ -1,10 +1,14 @@
-package ru.whbex.lib.sql;
+package ru.whbex.lib.sql.v2;
 
 import org.slf4j.event.Level;
 import ru.whbex.lib.log.LogContext;
-import ru.whbex.lib.sql.conn.ConnectionProvider;
+import ru.whbex.lib.sql.SQLCallback;
+import ru.whbex.lib.sql.SQLResponse;
+import ru.whbex.lib.sql.v2.conn.ConnectionProvider;
 
 import java.sql.*;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
@@ -70,12 +74,25 @@ public final class SQLAdapterWIP {
             return this;
         }
         /**
-         * PreparedStatement value setter
+         * Set primary PreparedStatement value setter
          * @param ps PreparedStatement callback
          * @return Executor instance (chain)
          */
         public Executor setPrepared(SQLCallback<PreparedStatement> ps){
             inst.valueSetter = ps;
+            return this;
+        }
+
+        /**
+         * Add PreparedStatement value setter. Multiple value setters will enable batched execute
+         * @param ps PreparedStatement callback
+         * @return Executor instance (chain)
+         */
+        public Executor addPrepared(SQLCallback<PreparedStatement> ps){
+            if(inst.valueSetter == null)
+                return setPrepared(ps);
+            List<SQLCallback<PreparedStatement>> setters = inst.valueSetters == null ? new LinkedList<>() : inst.valueSetters;
+            setters.add(ps);
             return this;
         }
         /**
@@ -110,6 +127,7 @@ public final class SQLAdapterWIP {
     private SQLCallback<SQLResponse> queryCallback;
     private SQLCallback<SQLResponse> updateCallback;
     private SQLCallback<PreparedStatement> valueSetter;
+    private List<SQLCallback<PreparedStatement>> valueSetters;
     private Consumer<SQLException> except;
     private SQLAdapterWIP(ConnectionProvider provider){
         this.prov = provider;
@@ -173,6 +191,7 @@ public final class SQLAdapterWIP {
      */
     public void preparedUpdate(){
         try {
+            boolean batch = valueSetters
             preparedUpdate(prov, sql, valueSetter, updateCallback);
         } catch (SQLException e) {
             if(except != null)
@@ -237,12 +256,15 @@ public final class SQLAdapterWIP {
      * @param sql SQL Statement string
      * @param callback Update callback. Will be executed on query complete.
      * @param setter Value setter callback
+     * @param batch enable batched update
      */
-    public static void preparedUpdate(ConnectionProvider provider, String sql, SQLCallback<PreparedStatement> setter, SQLCallback<SQLResponse> callback) throws SQLException {
+    public static void preparedUpdate(ConnectionProvider provider, String sql, SQLCallback<PreparedStatement> setter, SQLCallback<SQLResponse> callback, boolean batch) throws SQLException {
         Connection conn = provider.getConnection();
         try(PreparedStatement ps = conn.prepareStatement(sql)){
             setter.execute(ps);
-            callback.execute(new SQLResponse(null, ps.executeUpdate(), null));
+            callback.execute(batch ?
+                    new SQLResponse(null, -1, ps.executeBatch()) :
+                    new SQLResponse(null, ps.executeUpdate(), null));
         } catch (SQLException e){
             handleException(e);
             throw new SQLException(e);

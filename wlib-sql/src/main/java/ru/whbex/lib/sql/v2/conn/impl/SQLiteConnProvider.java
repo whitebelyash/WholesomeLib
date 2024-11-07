@@ -1,9 +1,9 @@
-package ru.whbex.lib.sql.conn.impl;
+package ru.whbex.lib.sql.v2.conn.impl;
 
 import org.slf4j.event.Level;
 import ru.whbex.lib.log.LogContext;
-import ru.whbex.lib.sql.conn.ConnectionConfig;
-import ru.whbex.lib.sql.conn.ConnectionProvider;
+import ru.whbex.lib.sql.v2.conn.ConnectionConfig;
+import ru.whbex.lib.sql.v2.conn.ConnectionProvider;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,14 +11,15 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class H2ConnProvider implements ConnectionProvider {
+// copy of H2ConnProvider
+public class SQLiteConnProvider implements ConnectionProvider {
     private final ConnectionConfig conf;
     private Connection conn;
     private final File db;
-    public H2ConnProvider(ConnectionConfig config) throws ClassNotFoundException, IOException {
+    public SQLiteConnProvider(ConnectionConfig config) throws ClassNotFoundException, IOException {
         this.conf = config;
         // Do not initialize if H2 not present in the classpath
-        Class.forName("org.h2.Driver");
+        Class.forName("org.sqlite.JDBC");
         // Initialize database file
         db = new File(config.dbAddress(), config.dbName());
         if(!db.exists())
@@ -29,14 +30,14 @@ public class H2ConnProvider implements ConnectionProvider {
     public Connection getConnection() throws SQLException {
         if(conn != null && !conn.isClosed())
             return conn;
-        conn = DriverManager.getConnection(ConnectionProvider.JDBC_PREFIX + "h2:" + db.getAbsolutePath());
+        conn = DriverManager.getConnection(ConnectionProvider.JDBC_PREFIX + "sqlite:" + db.getAbsolutePath());
         return conn;
     }
 
     @Override
     public Connection newConnection() throws SQLException {
         breakConnection();
-        conn = DriverManager.getConnection(ConnectionProvider.JDBC_PREFIX + "h2:" + db.getAbsolutePath());
+        conn = DriverManager.getConnection(ConnectionProvider.JDBC_PREFIX + "sqlite:" + db.getAbsolutePath());
         return conn;
     }
 
