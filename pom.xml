@@ -6,7 +6,7 @@
 
     <groupId>ru.whbex.lib</groupId>
     <artifactId>main</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
         <module>wlib-sql</module>
@@ -27,7 +27,7 @@
             <dependency>
                 <groupId>ru.whbex.lib</groupId>
                 <artifactId>wlib-log</artifactId>
-                <version>0.1-SNAPSHOT</version>
+                <version>0.2-SNAPSHOT</version>
                 <scope>compile</scope>
             </dependency>
             <dependency>

@@ -6,7 +6,7 @@
     <parent>
         <groupId>ru.whbex.lib</groupId>
         <artifactId>main</artifactId>
-        <version>0.1-SNAPSHOT</version>
+        <version>0.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>wlib-log</artifactId>
@@ -25,7 +25,7 @@
         <dependency>
             <groupId>ru.whbex.lib</groupId>
             <artifactId>wlib-string</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>0.2-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
