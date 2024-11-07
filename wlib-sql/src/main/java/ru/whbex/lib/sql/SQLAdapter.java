@@ -300,7 +300,7 @@ public final class SQLAdapter {
         LogContext.log(Level.ERROR, "=== Failed to execute SQL query/update! ===");
         LogContext.log(Level.ERROR, "Message: {0}", e.getLocalizedMessage());
         LogContext.log(Level.ERROR, "SQL Statement: {0}", sql);
-        LogContext.log(Level.ERROR, "ConnectionProvider config: {0}", prov);
+        LogContext.log(Level.ERROR, "ConnectionProvider config: {0}", prov.getConfig());
         LogContext.log(Level.ERROR, "=== !!! ===");
     }
 
