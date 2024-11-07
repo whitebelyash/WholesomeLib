@@ -1,6 +1,6 @@
 package ru.whbex.lib.sql.impl;
 
-import ru.whbex.lib.sql.ConnectionData;
+import ru.whbex.lib.sql.v2.conn.ConnectionConfig;
 import ru.whbex.lib.sql.SQLAdapter;
 
 import java.io.File;
@@ -11,7 +11,7 @@ import java.sql.SQLException;
 
 public class SQLiteAdapter extends SQLAdapter {
     private final String path;
-    public SQLiteAdapter(ConnectionData data) throws ClassNotFoundException, NoClassDefFoundError, IOException {
+    public SQLiteAdapter(ConnectionConfig data) throws ClassNotFoundException, NoClassDefFoundError, IOException {
         super(org.sqlite.JDBC.class.getName());
         File db = new File(data.dbAddress(), data.dbName());
         if(!db.exists())
