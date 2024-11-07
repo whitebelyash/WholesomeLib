@@ -9,14 +9,18 @@ import java.io.FileReader;
 import java.io.IOException;
 
 /**
- * Language file - java.io.File wrapper for .lang files
- * Format: key.key1.key2=value, key1.key2=   value
+ * Language file - java.io.File wrapper for .lang files.
+ * Format:
+ * <pre>
+ * root.key1.key2=value
+ * key1.key2=   value
+ * </pre>
  * Everything after = belongs to value, quotes are not supported yet
- * TODO: Multiple lines
- * TODO: Quotes
- * TODO: spaces between separator
- * TODO: Unit tests?
  */
+// TODO: Multiple lines
+// TODO: Quotes
+// TODO: spaces between separator
+// TODO: Unit tests?
 public final class LanguageFile {
 
 

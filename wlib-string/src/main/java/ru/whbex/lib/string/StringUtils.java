@@ -8,8 +8,10 @@ import java.util.UUID;
 public class StringUtils {
 
     /**
-     * Format string with {arg_number} placeholder.
-     * Example: simpleformat("Hello, {0}!", "world") -> Hello, world!
+     * Format string with {arg_number} placeholders. Example:
+     * <pre>
+     * simpleformat("Hello, {0}!", "world") -> Hello, world!
+     * </pre>
      * @param base string format
      * @param args arguments
      * @return formatted string

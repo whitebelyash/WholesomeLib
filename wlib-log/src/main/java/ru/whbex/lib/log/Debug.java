@@ -4,6 +4,7 @@ import ru.whbex.lib.string.StringUtils;
 
 public class Debug {
     // May add runtime changing in the future
+    // Consider using DEBUG level with SLF4J?
     private static boolean DEBUG = Boolean.parseBoolean(System.getProperty("whbex.debug"));
     public static void print(String m, Object... args){
         if(!DEBUG)
