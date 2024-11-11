@@ -2,8 +2,13 @@ package ru.whbex.lib.sql;
 
 import java.sql.SQLException;
 
+/**
+ * Checked SQL Callback
+ * @param <T> Accept type
+ * @param <R> Return type
+ */
 @FunctionalInterface
-public interface SQLCallback<T> {
+public interface SQLCallback<T, R> {
 
-    boolean execute(T t) throws SQLException;
+    R execute(T t) throws SQLException;
 }

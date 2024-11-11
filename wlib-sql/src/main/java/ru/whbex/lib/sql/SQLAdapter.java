@@ -11,22 +11,25 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * SQLAdapter. Single method SQL database access.
  */
-public final class SQLAdapter {
-    public final class Executor {
-        private final SQLAdapter inst = SQLAdapter.this;
-        private Consumer<SQLAdapter> task;
+public final class SQLAdapter<T> {
+    public final class Executor<T> {
+        @SuppressWarnings("unchecked")
+        private final SQLAdapter<T> inst = (SQLAdapter<T>) SQLAdapter.this;
+        private Consumer<SQLAdapter<T>> task;
         private ExecutorService eserv;
+        private T val;
 
         /**
          * Task to execute on SQLAdapter
          * @param task Task. See available method references
          * @return Executor instance (chain)
          */
-        private Executor task(Consumer<SQLAdapter> task){
+        private Executor<T> task(Consumer<SQLAdapter<T>> task){
             this.task = task;
             return this;
         }
@@ -36,7 +39,7 @@ public final class SQLAdapter {
          * @param sql SQL Statement string
          * @return Executor instance (chain)
          */
-        public Executor sql(String sql){
+        public Executor<T> sql(String sql){
             inst.sql = sql;
             return this;
         }
@@ -45,8 +48,9 @@ public final class SQLAdapter {
          * Set verbosity status. When true - will log failed operations.
          * @param verbose status
          */
-        public void setVerbose(boolean verbose){
+        public Executor<T> setVerbose(boolean verbose){
             inst.verbose = verbose;
+            return this;
         }
 
         /**
@@ -54,7 +58,7 @@ public final class SQLAdapter {
          * @param except Task
          * @return Executor instance (chain)
          */
-        public Executor exceptionally(Consumer<SQLException> except){
+        public Executor<T> exceptionally(Consumer<SQLException> except){
             inst.except = except;
             return this;
         }
@@ -64,7 +68,7 @@ public final class SQLAdapter {
          * @param callback callback
          * @return Executor instance (chain)
          */
-        public Executor queryCallback(SQLCallback<SQLResponse> callback){
+        public Executor<T> queryCallback(SQLCallback<SQLResponse, T> callback){
             inst.queryCallback = callback;
             return this;
         }
@@ -73,16 +77,16 @@ public final class SQLAdapter {
          * @param callback callback
          * @return Executor instance (chain)
          */
-        public Executor updateCallback(SQLCallback<SQLResponse> callback){
+        public Executor<T> updateCallback(SQLCallback<SQLResponse, Void> callback){
             inst.updateCallback = callback;
             return this;
         }
         /**
-         * Set primary PreparedStatement value setter
+         * Set primary PreparedStatement value setter. Won't affect additional value setters.
          * @param ps PreparedStatement callback
          * @return Executor instance (chain)
          */
-        public Executor setPrepared(SQLCallback<PreparedStatement> ps){
+        public Executor<T> setPrepared(SQLCallback<PreparedStatement, Void> ps){
             inst.valueSetter = ps;
             return this;
         }
@@ -92,10 +96,10 @@ public final class SQLAdapter {
          * @param ps PreparedStatement callback
          * @return Executor instance (chain)
          */
-        public Executor addPrepared(SQLCallback<PreparedStatement> ps){
+        public Executor<T> addPrepared(SQLCallback<PreparedStatement, Void> ps){
             if(inst.valueSetter == null)
                 return setPrepared(ps);
-            List<SQLCallback<PreparedStatement>> setters = inst.valueSetters == null ? new LinkedList<>() : inst.valueSetters;
+            List<SQLCallback<PreparedStatement, Void>> setters = inst.valueSetters == null ? new LinkedList<>() : inst.valueSetters;
             setters.add(ps);
             return this;
         }
@@ -104,7 +108,7 @@ public final class SQLAdapter {
          * @param es executor service instance
          * @return Executor instance (chain)
          */
-        public Executor executorService(ExecutorService es){
+        public Executor<T> executorService(ExecutorService es){
             this.eserv = es;
             return this;
         }
@@ -112,46 +116,61 @@ public final class SQLAdapter {
         /**
          * Execute task on SQLAdapter
          */
-        public void execute(){
+        public T execute(){
             task.accept(inst);
+            return inst.val;
         }
 
         /**
          * Execute task on SQLAdapter asynchronously
          * @return Future object of task or null if ExecutorService wasn't provided.
          */
-        public Future<Void> executeAsync(){
+        public Future<T> executeAsync(){
             if(eserv != null)
-                return eserv.submit(() -> {execute(); return null;});
+                return eserv.submit(() -> {execute(); return val;});
             return null;
         }
     }
     private final ConnectionProvider prov;
+    private final Class<T> type;
+    private T val;
     private String sql;
     private boolean verbose = true;
-    private SQLCallback<SQLResponse> queryCallback;
-    private SQLCallback<SQLResponse> updateCallback;
-    private SQLCallback<PreparedStatement> valueSetter;
-    private List<SQLCallback<PreparedStatement>> valueSetters;
+    private SQLCallback<SQLResponse, T> queryCallback;
+    private SQLCallback<SQLResponse, Void> updateCallback;
+    private SQLCallback<PreparedStatement, Void> valueSetter;
+    private List<SQLCallback<PreparedStatement, Void>> valueSetters;
     private Consumer<SQLException> except;
-    private SQLAdapter(ConnectionProvider provider){
+    private SQLAdapter(ConnectionProvider provider, Class<T> ret){
         this.prov = provider;
+        this.type = ret;
     }
 
+    /**
+     * Get executor chain.
+     * @param returnType return type class
+     * @param provider Connection provider
+     * @param task Task to execute on SQLAdapter. See available method references
+     * @return Executor instance
+     */
+    public static <T> SQLAdapter<T>.Executor<T> executor(Class<T> returnType, ConnectionProvider provider, Consumer<SQLAdapter<T>> task){
+        return new SQLAdapter<>(provider, returnType)
+                .newExecutor()
+                .task(task);
+    }
     /**
      * Get executor chain.
      * @param provider Connection provider
      * @param task Task to execute on SQLAdapter. See available method references
      * @return Executor instance
      */
-    public static Executor executor(ConnectionProvider provider, Consumer<SQLAdapter> task){
-        return new SQLAdapter(provider)
+    public static SQLAdapter<Void>.Executor<Void> executor(ConnectionProvider provider, Consumer<SQLAdapter<Void>> task){
+        return new SQLAdapter<>(provider, Void.class)
                 .newExecutor()
                 .task(task);
-
     }
-    private Executor newExecutor(){
-        return new Executor();
+    private Executor<T> newExecutor(){
+        return new Executor<>();
 
     }
 
@@ -160,9 +179,9 @@ public final class SQLAdapter {
      */
     public void query() {
         try {
-            query(prov, sql, queryCallback, verbose);
+            val = query(type, prov, sql, queryCallback, verbose);
         } catch (SQLException e) {
-            if(except != null)
+            if (except != null)
                 except.accept(e);
         }
     }
@@ -172,7 +191,7 @@ public final class SQLAdapter {
      */
     public void preparedQuery() {
         try {
-            preparedQuery(prov, sql, valueSetter, queryCallback, verbose);
+            val = preparedQuery(type, prov, sql, valueSetter, queryCallback, verbose);
         } catch (SQLException e) {
             if(except != null)
                 except.accept(e);
@@ -198,15 +217,15 @@ public final class SQLAdapter {
         try {
             Debug.print("update is batched!");
             boolean batch = valueSetters != null && !valueSetters.isEmpty();
-            SQLCallback<PreparedStatement> p = batch ?
+            SQLCallback<PreparedStatement, Void> p = batch ?
                     ps -> {
                         valueSetter.execute(ps);
                         ps.addBatch();
-                        for (SQLCallback<PreparedStatement> sc : valueSetters) {
+                        for (SQLCallback<PreparedStatement, Void> sc : valueSetters) {
                             sc.execute(ps);
                             ps.addBatch();
                         }
-                        return true;
+                        return null;
                     } :
                     valueSetter;
             preparedUpdate(prov, sql, valueSetter, updateCallback, batch, verbose);
@@ -223,12 +242,12 @@ public final class SQLAdapter {
      * @param callback Query callback. Will be executed on query complete, ResultSet is managed on SQLAdapter side, don't close
      * @param verbose log failed database execution (will forward exception anyway)
      */
-    public static void query(ConnectionProvider provider, String sql, SQLCallback<SQLResponse> callback, boolean verbose) throws SQLException {
+    public static <T> T query(Class<T> ret, ConnectionProvider provider, String sql, SQLCallback<SQLResponse, T> callback, boolean verbose) throws SQLException {
         Connection conn = provider.getConnection();
         // formatting shit
         // AFAIK closing statement will close resultset automatically
         try(Statement s = conn.createStatement()){
-            callback.execute(new SQLResponse(s.executeQuery(sql), -1, null));
+            return callback.execute(new SQLResponse(s.executeQuery(sql), -1, null));
         } catch (SQLException e){
             if(verbose)
                 handleException(e, sql, provider);
@@ -243,13 +262,13 @@ public final class SQLAdapter {
      * @param setter Value setter callback
      * @param verbose log failed database execution (will forward exception anyway)
      */
-    public static void preparedQuery(ConnectionProvider provider, String sql, SQLCallback<PreparedStatement> setter, SQLCallback<SQLResponse> callback, boolean verbose) throws SQLException {
+    public static <T> T preparedQuery(Class<T> ret, ConnectionProvider provider, String sql, SQLCallback<PreparedStatement, Void> setter, SQLCallback<SQLResponse, T> callback, boolean verbose) throws SQLException {
         Connection conn = provider.getConnection();
         try(PreparedStatement ps = conn.prepareStatement(sql)){
             // set all values
             setter.execute(ps);
             // dispatch query
-            callback.execute(new SQLResponse(ps.executeQuery(), -1, null));
+            return callback.execute(new SQLResponse(ps.executeQuery(), -1, null));
         } catch (SQLException e){
             if(verbose)
                 handleException(e, sql, provider);
@@ -263,7 +282,7 @@ public final class SQLAdapter {
      * @param callback Update callback. Will be executed on update complete.
      * @param verbose log failed database execution (will forward exception anyway)
      */
-    public static void update(ConnectionProvider provider, String sql, SQLCallback<SQLResponse> callback, boolean verbose) throws SQLException {
+    public static void update(ConnectionProvider provider, String sql, SQLCallback<SQLResponse, Void> callback, boolean verbose) throws SQLException {
         Connection conn = provider.getConnection();
         try(Statement s = conn.createStatement()){
             callback.execute(new SQLResponse(null, s.executeUpdate(sql), null));
@@ -282,7 +301,7 @@ public final class SQLAdapter {
      * @param batch enable batched update
      * @param verbose log failed database execution (will forward exception anyway)
      */
-    public static void preparedUpdate(ConnectionProvider provider, String sql, SQLCallback<PreparedStatement> setter, SQLCallback<SQLResponse> callback, boolean batch, boolean verbose) throws SQLException {
+    public static void preparedUpdate(ConnectionProvider provider, String sql, SQLCallback<PreparedStatement, Void> setter, SQLCallback<SQLResponse, Void> callback, boolean batch, boolean verbose) throws SQLException {
         Connection conn = provider.getConnection();
         try(PreparedStatement ps = conn.prepareStatement(sql)){
             setter.execute(ps);
