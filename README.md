@@ -32,7 +32,7 @@ public class Main {
                 .updateCallback(i -> { l.info("aff rows upd: %d\n", i.updateResult()); return null;})
                 .exceptionally(e -> { throw new RuntimeException(e); })
                 .execute();
-        String ret = SQLAdapter.executor(provider, SQLAdapter::query)
+        String ret = SQLAdapter.executor(String.class, provider, SQLAdapter::query)
                 .sql("SELECT * FROM test;")
                 .queryCallback(resp -> {
                     if(resp.resultSet().next())
