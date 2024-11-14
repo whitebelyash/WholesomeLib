@@ -14,6 +14,7 @@
         <module>wlib-log</module>
         <module>wlib-string</module>
         <module>wlib-collections</module>
+        <module>wlib-reflect</module>
     </modules>
 
     <properties>
