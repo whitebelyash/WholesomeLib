@@ -220,19 +220,14 @@ public final class SQLAdapter<T> {
     public void preparedUpdate(){
         try {
             boolean batch = valueSetters != null && !valueSetters.isEmpty();
-            if(batch)
-                Debug.print("Batched update!");
             SQLCallback<PreparedStatement, Void> p = batch ?
                     ps -> {
-                        ps.clearParameters();
                         valueSetter.execute(ps);
                         ps.addBatch();
                         for (SQLCallback<PreparedStatement, Void> sc : valueSetters) {
                             sc.execute(ps);
-                            Debug.print("added additional batch");
                             ps.addBatch();
                         }
-                        Debug.print("ps: " + ps.toString());
                         return null;
                     } :
                     valueSetter;
