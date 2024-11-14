@@ -88,6 +88,7 @@ public final class SQLAdapter<T> {
          */
         public Executor<T> setPrepared(SQLCallback<PreparedStatement, Void> ps){
             inst.valueSetter = ps;
+            inst.valueSetterExists = true;
             return this;
         }
 
@@ -97,10 +98,12 @@ public final class SQLAdapter<T> {
          * @return Executor instance (chain)
          */
         public Executor<T> addPrepared(SQLCallback<PreparedStatement, Void> ps){
-            if(inst.valueSetter == null)
+            if(!inst.valueSetterExists)
                 return setPrepared(ps);
+            Debug.print("Adding additional prepared statement");
             List<SQLCallback<PreparedStatement, Void>> setters = inst.valueSetters == null ? new LinkedList<>() : inst.valueSetters;
             setters.add(ps);
+            inst.valueSetters = setters;
             return this;
         }
         /**
@@ -136,9 +139,10 @@ public final class SQLAdapter<T> {
     private T val;
     private String sql;
     private boolean verbose = true;
-    private SQLCallback<SQLResponse, T> queryCallback;
-    private SQLCallback<SQLResponse, Void> updateCallback;
-    private SQLCallback<PreparedStatement, Void> valueSetter;
+    private SQLCallback<SQLResponse, T> queryCallback = resp -> null;
+    private SQLCallback<SQLResponse, Void> updateCallback = resp -> null;
+    private SQLCallback<PreparedStatement, Void> valueSetter = ps -> null;
+    private boolean valueSetterExists = false;
     private List<SQLCallback<PreparedStatement, Void>> valueSetters;
     private Consumer<SQLException> except;
     private SQLAdapter(ConnectionProvider provider, Class<T> ret){
@@ -215,20 +219,24 @@ public final class SQLAdapter<T> {
      */
     public void preparedUpdate(){
         try {
-            Debug.print("update is batched!");
             boolean batch = valueSetters != null && !valueSetters.isEmpty();
+            if(batch)
+                Debug.print("Batched update!");
             SQLCallback<PreparedStatement, Void> p = batch ?
                     ps -> {
+                        ps.clearParameters();
                         valueSetter.execute(ps);
                         ps.addBatch();
                         for (SQLCallback<PreparedStatement, Void> sc : valueSetters) {
                             sc.execute(ps);
+                            Debug.print("added additional batch");
                             ps.addBatch();
                         }
+                        Debug.print("ps: " + ps.toString());
                         return null;
                     } :
                     valueSetter;
-            preparedUpdate(prov, sql, valueSetter, updateCallback, batch, verbose);
+            preparedUpdate(prov, sql, p, updateCallback, batch, verbose);
         } catch (SQLException e) {
             if(except != null)
                 except.accept(e);
