@@ -1,5 +1,6 @@
 package ru.whbex.lib.sql;
 
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 /**
@@ -9,6 +10,8 @@ import java.sql.SQLException;
  */
 @FunctionalInterface
 public interface SQLCallback<T, R> {
-
     R execute(T t) throws SQLException;
+    interface PreparedCallback {
+        void set(PreparedStatement ps) throws SQLException;
+    }
 }

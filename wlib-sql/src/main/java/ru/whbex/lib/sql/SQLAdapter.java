@@ -86,7 +86,7 @@ public final class SQLAdapter<T> {
          * @param ps PreparedStatement callback
          * @return Executor instance (chain)
          */
-        public Executor<T> setPrepared(SQLCallback<PreparedStatement, Void> ps){
+        public Executor<T> setPrepared(SQLCallback.PreparedCallback ps){
             inst.valueSetter = ps;
             inst.valueSetterExists = true;
             return this;
@@ -97,11 +97,11 @@ public final class SQLAdapter<T> {
          * @param ps PreparedStatement callback
          * @return Executor instance (chain)
          */
-        public Executor<T> addPrepared(SQLCallback<PreparedStatement, Void> ps){
+        public Executor<T> addPrepared(SQLCallback.PreparedCallback ps){
             if(!inst.valueSetterExists)
                 return setPrepared(ps);
             Debug.print("Adding additional prepared statement");
-            List<SQLCallback<PreparedStatement, Void>> setters = inst.valueSetters == null ? new LinkedList<>() : inst.valueSetters;
+            List<SQLCallback.PreparedCallback> setters = inst.valueSetters == null ? new LinkedList<>() : inst.valueSetters;
             setters.add(ps);
             inst.valueSetters = setters;
             return this;
@@ -141,9 +141,9 @@ public final class SQLAdapter<T> {
     private boolean verbose = true;
     private SQLCallback<SQLResponse, T> queryCallback = resp -> null;
     private SQLCallback<SQLResponse, Void> updateCallback = resp -> null;
-    private SQLCallback<PreparedStatement, Void> valueSetter = ps -> null;
+    private SQLCallback.PreparedCallback valueSetter = ps -> {};
     private boolean valueSetterExists = false;
-    private List<SQLCallback<PreparedStatement, Void>> valueSetters;
+    private List<SQLCallback.PreparedCallback> valueSetters;
     private Consumer<SQLException> except;
     private SQLAdapter(ConnectionProvider provider, Class<T> ret){
         this.prov = provider;
@@ -220,15 +220,14 @@ public final class SQLAdapter<T> {
     public void preparedUpdate(){
         try {
             boolean batch = valueSetters != null && !valueSetters.isEmpty();
-            SQLCallback<PreparedStatement, Void> p = batch ?
+            SQLCallback.PreparedCallback p = batch ?
                     ps -> {
-                        valueSetter.execute(ps);
+                        valueSetter.set(ps);
                         ps.addBatch();
-                        for (SQLCallback<PreparedStatement, Void> sc : valueSetters) {
-                            sc.execute(ps);
+                        for (SQLCallback.PreparedCallback sc : valueSetters) {
+                            sc.set(ps);
                             ps.addBatch();
                         }
-                        return null;
                     } :
                     valueSetter;
             preparedUpdate(prov, sql, p, updateCallback, batch, verbose);
@@ -265,11 +264,11 @@ public final class SQLAdapter<T> {
      * @param setter Value setter callback
      * @param verbose log failed database execution (will forward exception anyway)
      */
-    public static <T> T preparedQuery(Class<T> ret, ConnectionProvider provider, String sql, SQLCallback<PreparedStatement, Void> setter, SQLCallback<SQLResponse, T> callback, boolean verbose) throws SQLException {
+    public static <T> T preparedQuery(Class<T> ret, ConnectionProvider provider, String sql, SQLCallback.PreparedCallback setter, SQLCallback<SQLResponse, T> callback, boolean verbose) throws SQLException {
         Connection conn = provider.getConnection();
         try(PreparedStatement ps = conn.prepareStatement(sql)){
             // set all values
-            setter.execute(ps);
+            setter.set(ps);
             // dispatch query
             return callback.execute(new SQLResponse(ps.executeQuery(), -1, null));
         } catch (SQLException e){
@@ -304,10 +303,10 @@ public final class SQLAdapter<T> {
      * @param batch enable batched update
      * @param verbose log failed database execution (will forward exception anyway)
      */
-    public static void preparedUpdate(ConnectionProvider provider, String sql, SQLCallback<PreparedStatement, Void> setter, SQLCallback<SQLResponse, Void> callback, boolean batch, boolean verbose) throws SQLException {
+    public static void preparedUpdate(ConnectionProvider provider, String sql, SQLCallback.PreparedCallback setter, SQLCallback<SQLResponse, Void> callback, boolean batch, boolean verbose) throws SQLException {
         Connection conn = provider.getConnection();
         try(PreparedStatement ps = conn.prepareStatement(sql)){
-            setter.execute(ps);
+            setter.set(ps);
             callback.execute(batch ?
                     new SQLResponse(null, -1, ps.executeBatch()) :
                     new SQLResponse(null, ps.executeUpdate(), null));
