@@ -10,6 +10,7 @@ import java.util.Locale;
 import java.util.Map;
 
 public class Language {
+    private final static char NEW_LINE_CHAR = '\n';
     private final LanguageFile file;
 
     private String name;
@@ -33,7 +34,11 @@ public class Language {
                     file.next(); continue;
                 }
                 String[] phrase = file.getCurrentPhrase();
-                phrases.put(phrase[0], phrase[1]);
+                // Append new line to old phrase if key conflict occurs
+                if(phrases.containsKey(phrase[0]))
+                    phrases.put(phrase[0], phrases.get(phrase[0]) + NEW_LINE_CHAR + phrase[1]);
+                else
+                    phrases.put(phrase[0], phrase[1]);
                 file.next();
             }
         } catch (Exception e) {
