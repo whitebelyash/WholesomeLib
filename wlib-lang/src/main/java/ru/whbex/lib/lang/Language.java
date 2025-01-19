@@ -23,8 +23,8 @@ public class Language {
         try {
             file.open();
         } catch (IOException e) {
-            LogContext.log(Level.ERROR, "Failed to initialize language file at " + file.getFile().getPath());
-            e.printStackTrace();
+            LogContext.log(Level.ERROR, "Failed to open language file {0}", file.getFile().getPath());
+            Debug.dbg_printStacktrace(e);
         }
         this.file = file;
         // LangFile is now pointing at first line
@@ -43,13 +43,15 @@ public class Language {
             }
         } catch (Exception e) {
             LogContext.log(Level.ERROR, "Failed reading LangFile {0} at {1} line", file.getFile().getName(), file.getPosition());
+            Debug.dbg_printStacktrace(e);
         }
         Debug.print("Loaded Language at {0}. Will load metadata now", file.toString());
         this.loadMetadata();
         try {
             file.close();
         } catch (IOException e) {
-            Debug.print("Failed to close LangFile {0}!", file.toString());
+            LogContext.log(Level.ERROR, "Failed to close language file {0}!", file.toString());
+            Debug.dbg_printStacktrace(e);
         }
     }
 
