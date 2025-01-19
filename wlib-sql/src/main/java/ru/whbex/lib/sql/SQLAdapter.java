@@ -14,7 +14,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * SQLAdapter. Single method SQL database access.
+ * SQLAdapter. Single call SQL database access.
  */
 public final class SQLAdapter<T> {
     public final class Executor<T> {
@@ -245,8 +245,6 @@ public final class SQLAdapter<T> {
      */
     public static <T> T query(Class<T> ret, ConnectionProvider provider, String sql, SQLCallback<SQLResponse, T> callback, boolean verbose) throws SQLException {
         Connection conn = provider.getConnection();
-        // formatting shit
-        // AFAIK closing statement will close resultset automatically
         try(Statement s = conn.createStatement()){
             return callback.execute(new SQLResponse(s.executeQuery(sql), -1, null));
         } catch (SQLException e){
@@ -266,9 +264,7 @@ public final class SQLAdapter<T> {
     public static <T> T preparedQuery(Class<T> ret, ConnectionProvider provider, String sql, SQLCallback.PreparedCallback setter, SQLCallback<SQLResponse, T> callback, boolean verbose) throws SQLException {
         Connection conn = provider.getConnection();
         try(PreparedStatement ps = conn.prepareStatement(sql)){
-            // set all values
             setter.set(ps);
-            // dispatch query
             return callback.execute(new SQLResponse(ps.executeQuery(), -1, null));
         } catch (SQLException e){
             if(verbose)
