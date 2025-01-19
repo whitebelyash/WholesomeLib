@@ -18,7 +18,7 @@ public class SQLiteProvider implements ConnectionProvider {
     private final File db;
     public SQLiteProvider(ConnectionConfig config) throws ClassNotFoundException, IOException {
         this.conf = config;
-        // Do not initialize if H2 not present in the classpath
+        // Do not initialize if SQLite not present in the classpath
         Class.forName("org.sqlite.JDBC");
         // Initialize database file
         db = new File(config.dbAddress(), config.dbName());
