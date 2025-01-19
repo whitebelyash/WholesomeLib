@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 
 /**
  * Read only view of Set as List object.
+ * NOTE: can break something if real list expected. Use with caution
  * @param <T> List element type
  */
 public class SetListView<T> implements List<T> {
