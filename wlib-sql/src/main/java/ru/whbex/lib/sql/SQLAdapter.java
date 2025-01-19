@@ -100,7 +100,6 @@ public final class SQLAdapter<T> {
         public Executor<T> addPrepared(SQLCallback.PreparedCallback ps){
             if(!inst.valueSetterExists)
                 return setPrepared(ps);
-            Debug.print("Adding additional prepared statement");
             List<SQLCallback.PreparedCallback> setters = inst.valueSetters == null ? new LinkedList<>() : inst.valueSetters;
             setters.add(ps);
             inst.valueSetters = setters;
