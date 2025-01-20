@@ -9,7 +9,7 @@
         <version>0.2-SNAPSHOT</version>
     </parent>
 
-    <artifactId>reflect</artifactId>
+    <artifactId>wlib-reflect</artifactId>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
