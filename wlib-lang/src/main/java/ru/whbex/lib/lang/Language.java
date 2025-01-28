@@ -19,40 +19,12 @@ public class Language {
 
     private final Map<String, String> phrases = new HashMap<>();
 
-    public Language(LanguageFile file){
-        try {
-            file.open();
-        } catch (IOException e) {
-            LogContext.log(Level.ERROR, "Failed to open language file {0}", file.getFile().getPath());
-            Debug.dbg_printStacktrace(e);
-        }
+    public Language(LanguageFile file) throws IOException {
         this.file = file;
-        // LangFile is now pointing at first line
-        try {
-            while(file.hasNextLine()){
-                if(file.isCommented()){
-                    file.next(); continue;
-                }
-                String[] phrase = file.getCurrentPhrase();
-                // Append new line to old phrase if key conflict occurs
-                if(phrases.containsKey(phrase[0]))
-                    phrases.put(phrase[0], phrases.get(phrase[0]) + NEW_LINE_CHAR + phrase[1]);
-                else
-                    phrases.put(phrase[0], phrase[1]);
-                file.next();
-            }
-        } catch (Exception e) {
-            LogContext.log(Level.ERROR, "Failed reading LangFile {0} at {1} line", file.getFile().getName(), file.getPosition());
-            Debug.dbg_printStacktrace(e);
-        }
-        Debug.print("Loaded Language at {0}. Will load metadata now", file.toString());
+        file.open();
+        this.loadPhrases();
         this.loadMetadata();
-        try {
-            file.close();
-        } catch (IOException e) {
-            LogContext.log(Level.ERROR, "Failed to close language file {0}!", file.toString());
-            Debug.dbg_printStacktrace(e);
-        }
+        file.close();
     }
 
     private void loadMetadata(){
@@ -63,9 +35,38 @@ public class Language {
         if((nameLocalized = phrases.get("locale.name")) == null)
             LogContext.log(Level.WARN, "Locale {0} has no localized name! Check locale.name tag in the file.", file.getFile().getName());
     }
+    private void loadPhrases(){
+        try {
+            while(file.hasNextLine()){
+                if(file.isCommented()){
+                    file.next(); continue;
+                }
+                String[] phrase = file.getCurrentPhrase();
+                if(phrase == null){
+                    file.next(); continue;
+                }
+                // Append new line to old phrase if key conflict occurs
+                if(phrases.containsKey(phrase[0]))
+                    phrases.put(phrase[0], phrases.get(phrase[0]) + NEW_LINE_CHAR + phrase[1]);
+                else
+                    phrases.put(phrase[0], phrase[1]);
+                file.next();
+            }
+        } catch (Exception e) {
+            LogContext.log(Level.ERROR, "Failed reading LangFile {0} at {1} line", file.getFile().getName(), file.getPosition());
+        }
+        Debug.print("Loaded {0} phrases from language file {0}", phrases.size(), file.toString());
+    }
 
+    public void reloadPhrases() throws IOException {
+        file.open();
+        file.setPosition(0); // reset position just in case
+        loadPhrases();
+        loadMetadata();
+        file.close();
+    }
     public String getName() {
-        return name;
+        return name == null ? file.getFile().getName() : name;
     }
     public String getNameLocalized() {
         return nameLocalized;
@@ -80,8 +81,6 @@ public class Language {
     public String getPhrase(String key){
         return hasPhrase(key) ? phrases.get(key) : key;
     }
-
-
     public Map<String, String> getPhrases() {
         return phrases;
     }
