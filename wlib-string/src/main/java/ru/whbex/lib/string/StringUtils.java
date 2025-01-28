@@ -61,4 +61,11 @@ public class StringUtils {
             return new SimpleDateFormat().format(date);
         }
     }
+    public static int parseInt(String s, int fallback){
+        try {
+            return Integer.parseInt(s);
+        } catch (NumberFormatException e){
+            return fallback;
+        }
+    }
 }
