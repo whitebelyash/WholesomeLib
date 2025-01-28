@@ -61,6 +61,7 @@ public class Language {
     public void reloadPhrases() throws IOException {
         file.open();
         file.setPosition(0); // reset position just in case
+        phrases.clear();
         loadPhrases();
         loadMetadata();
         file.close();
