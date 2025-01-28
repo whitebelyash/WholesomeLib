@@ -63,7 +63,7 @@ public final class LanguageFile {
 
     /**
      * Set language file reader position
-     * @param pos position
+     * @param pos position (starts from 1)
      * @throws IOException on IO errors
      * @throws UnsupportedOperationException if language file is closed
      * @throws IllegalArgumentException if position is less than 1
@@ -139,7 +139,7 @@ public final class LanguageFile {
         String[] ret = current.split("=", 2);
         // value can be empty
         if(ret.length != 2 || ret[0].isEmpty())
-            throw new IllegalArgumentException("Invalid string length!");
+            throw new IllegalArgumentException("Invalid string length (s: " + current + ")!" );
         // ignore commented text in locale value (everything after #)
         int commentIndex = ret[1].indexOf('#');
         if(commentIndex > 0 && ret[1].charAt(commentIndex - 1) != '\\'){
