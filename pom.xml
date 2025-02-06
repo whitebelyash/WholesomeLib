@@ -15,6 +15,7 @@
         <module>wlib-string</module>
         <module>wlib-collections</module>
         <module>wlib-reflect</module>
+        <module>wlib-bukkit</module>
     </modules>
 
     <properties>

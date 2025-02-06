@@ -9,7 +9,7 @@
         <version>0.2-SNAPSHOT</version>
     </parent>
 
-    <artifactId>wlib-reflect</artifactId>
+    <artifactId>wlib-bukkit</artifactId>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
