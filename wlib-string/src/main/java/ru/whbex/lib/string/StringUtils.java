@@ -26,7 +26,7 @@ public class StringUtils {
             if(args[p] == null)
                 continue;
             int start = sb.indexOf("{" + p + "}");
-            if(start > 0)
+            if(start > -1)
                 sb.replace(start, start + 3, String.valueOf(args[p]));
         }
         return sb.toString();
