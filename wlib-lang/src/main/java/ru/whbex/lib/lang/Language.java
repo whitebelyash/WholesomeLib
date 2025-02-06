@@ -55,7 +55,7 @@ public class Language {
         } catch (Exception e) {
             LogContext.log(Level.ERROR, "Failed reading LangFile {0} at {1} line", file.getFile().getName(), file.getPosition());
         }
-        Debug.print("Loaded {0} phrases from language file {0}", phrases.size(), file.toString());
+        Debug.print("Loaded {0} phrases from language file {1}", phrases.size(), file.toString());
     }
 
     public void reloadPhrases() throws IOException {
