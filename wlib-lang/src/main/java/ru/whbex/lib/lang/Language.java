@@ -19,8 +19,11 @@ public class Language {
 
     private final Map<String, String> phrases = new HashMap<>();
 
-    public Language(LanguageFile file) throws IOException {
+    public Language(LanguageFile file) {
         this.file = file;
+    }
+
+    public void load() throws IOException {
         file.open();
         this.loadPhrases();
         this.loadMetadata();
