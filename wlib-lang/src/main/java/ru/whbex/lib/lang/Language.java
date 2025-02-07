@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Function;
 
 public class Language {
     private final static char NEW_LINE_CHAR = '\n';
@@ -16,6 +17,8 @@ public class Language {
     private String name;
     private String nameLocalized;
     private Locale locale;
+
+    private Function<String, String> phraseMapper;
 
     private final Map<String, String> phrases = new HashMap<>();
 
@@ -28,6 +31,10 @@ public class Language {
         this.loadPhrases();
         this.loadMetadata();
         file.close();
+    }
+
+    public void setPhraseMapper(Function<String, String> mapper){
+        this.phraseMapper = mapper;
     }
 
     private void loadMetadata(){
@@ -48,11 +55,12 @@ public class Language {
                 if(phrase == null){
                     file.next(); continue;
                 }
+                String val = phraseMapper != null ? phraseMapper.apply(phrase[1]) : phrase[1];
                 // Append new line to old phrase if key conflict occurs
                 if(phrases.containsKey(phrase[0]))
-                    phrases.put(phrase[0], phrases.get(phrase[0]) + NEW_LINE_CHAR + phrase[1]);
+                    phrases.put(phrase[0], phrases.get(phrase[0]) + NEW_LINE_CHAR + val);
                 else
-                    phrases.put(phrase[0], phrase[1]);
+                    phrases.put(phrase[0], val);
                 file.next();
             }
         } catch (Exception e) {
