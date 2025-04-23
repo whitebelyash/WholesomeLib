@@ -15,7 +15,7 @@ public class Debug {
     public static void print(String m, Object... args){
         if(!DEBUG)
             return;
-        LogContext.getLogger().info("Debug message >> " + StringUtils.simpleformat(m, args));
+        LogContext.getLogger().info("Debug message >> {}", StringUtils.simpleformat(m, args));
     }
 
     /**
@@ -27,7 +27,7 @@ public class Debug {
     public static void tprint(String tag, String m, Object... args){
         if(!DEBUG)
             return;
-        LogContext.getLogger().info("Debug message [" + tag + "] >> " + StringUtils.simpleformat(m, args));
+        LogContext.getLogger().info("Debug message [{}] >> {}", tag, StringUtils.simpleformat(m, args));
     }
 
     /**
@@ -39,9 +39,7 @@ public class Debug {
         if(!DEBUG)
             return;
         final StackTraceElement[] stackTrace = new Throwable().getStackTrace();
-        LogContext.getLogger().info("Debug message (from: " +
-                stackTrace[2].getFileName() + ":" + stackTrace[2].getLineNumber() + " >> ",
-                StringUtils.simpleformat(m, args));
+        LogContext.getLogger().info("Debug message (from: {}:{}) >> {}", stackTrace[1].getFileName(), stackTrace[1].getLineNumber(), StringUtils.simpleformat(m, args));
     }
     public static void dbg_printStacktrace(Throwable t){
         if(DEBUG)
