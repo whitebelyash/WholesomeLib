@@ -38,6 +38,8 @@ public class StringUtils {
      * @return UUID or null if uuid string is invalid
      */
     public static UUID UUIDFromString(String uuid){
+        if(uuid == null || uuid.isEmpty())
+            return null;
         UUID id;
         try {
             id = UUID.fromString(uuid);
