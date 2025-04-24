@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * SQLAdapter. Single call SQL database access.
@@ -129,7 +128,7 @@ public final class SQLAdapter<T> {
          */
         public Future<T> executeAsync(){
             if(eserv != null)
-                return eserv.submit(() -> {execute(); return val;});
+                return eserv.submit(this::execute);
             return null;
         }
     }
@@ -144,7 +143,7 @@ public final class SQLAdapter<T> {
     private boolean valueSetterExists = false;
     private List<SQLCallback.PreparedCallback> valueSetters;
     private Consumer<SQLException> except;
-    private SQLAdapter(ConnectionProvider provider, Class<T> ret){
+    private SQLAdapter(ConnectionProvider provider, Class<T> ret) {
         this.prov = provider;
         this.type = ret;
     }
