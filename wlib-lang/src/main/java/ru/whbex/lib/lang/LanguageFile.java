@@ -21,6 +21,7 @@ import java.io.IOException;
 // TODO: Quotes
 // TODO: spaces between separator
 // TODO: Unit tests?
+// TODO: Do not throw exceptions on closed file usage (I don't remember why had I even implemented this)
 public final class LanguageFile {
 
 
@@ -43,7 +44,7 @@ public final class LanguageFile {
      */
     public void open() throws IOException {
         if(empty)
-            throw new UnsupportedOperationException("Language file does not exists, cannot open");
+            throw new UnsupportedOperationException("Language file at " + file.getAbsolutePath() + "is missing!");
         reader = new BufferedReader(new FileReader(file));
         this.open = true;
         current = reader.readLine();
@@ -133,6 +134,8 @@ public final class LanguageFile {
      * @throws UnsupportedOperationException if language file is closed
      */
     public String[] getCurrentPhrase(){
+        if(!open)
+            throw new UnsupportedOperationException("Open language file before using it!");
         if(isCommented())
             return null;
         current = current.trim();
