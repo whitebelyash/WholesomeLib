@@ -6,7 +6,7 @@
     <parent>
         <groupId>ru.whbex.lib</groupId>
         <artifactId>main</artifactId>
-        <version>${revision}</version>
+        <version>0.3-SNAPSHOT</version>
     </parent>
 
     <artifactId>wlib-bukkit</artifactId>
