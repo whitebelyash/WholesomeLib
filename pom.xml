@@ -6,7 +6,7 @@
 
     <groupId>ru.whbex.lib</groupId>
     <artifactId>main</artifactId>
-    <version>0.2-SNAPSHOT</version>
+    <version>${revision}</version>
     <packaging>pom</packaging>
     <modules>
         <module>wlib-sql</module>
@@ -22,6 +22,7 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <revision>0.2-SNAPSHOT</revision>
     </properties>
 
     <dependencyManagement>
