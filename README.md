@@ -1,6 +1,6 @@
 # WholesomeLib
 
-A library with the code shared between my projects. Being developed for my personal needs, the commits might be not tested (but testing is still welcome :p).  
+A library with the code shared between my projects. Being developed for my personal needs, the commits might not be tested (but testing is still welcome :p)  
 
 Has custom collections, Bukkit/Spigot utilities, JDBC/SQL access code, Language support and more
 
