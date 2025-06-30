@@ -13,7 +13,7 @@ import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 /**
- * SQLAdapter. Single call SQL database access.
+ * SQLAdapter. Single call SQL/JDBC database access
  */
 public final class SQLAdapter<T> {
     public final class Executor<T> {
