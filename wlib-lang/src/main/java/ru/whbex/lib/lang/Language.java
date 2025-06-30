@@ -88,7 +88,11 @@ public class Language {
         return locale;
     }
     public boolean hasPhrase(String key){
-        return phrases.containsKey(key);
+        if(!phrases.containsKey(key)) {
+            LogContext.log(Level.WARN, "Phrase key {0} is unknown!", key);
+            return false;
+        }
+        return true;
     }
     public String getPhrase(String key){
         return hasPhrase(key) ? phrases.get(key) : key;
