@@ -179,7 +179,7 @@ public final class SQLAdapter<T> {
     /**
      * Execute query on SQLAdapter
      */
-    private void query() {
+    public void query() {
         try {
             val = query(type, prov, sql, queryCallback, verbose);
         } catch (SQLException e) {
@@ -191,7 +191,7 @@ public final class SQLAdapter<T> {
     /**
      * Execute query with PreparedStatement on SQLAdapter
      */
-    private void preparedQuery() {
+    public void preparedQuery() {
         try {
             val = preparedQuery(type, prov, sql, valueSetter, queryCallback, verbose);
         } catch (SQLException e) {
@@ -203,7 +203,7 @@ public final class SQLAdapter<T> {
     /**
      * Execute update on SQLAdapter
      */
-    private void update() {
+    public void update() {
         try {
             update(prov, sql, updateCallback, verbose);
         } catch (SQLException e) {
@@ -215,7 +215,7 @@ public final class SQLAdapter<T> {
     /**
      * Execute update with PreparedStatement on SQLAdapter
      */
-    private void preparedUpdate(){
+    public void preparedUpdate(){
         try {
             boolean batch = valueSetters != null && !valueSetters.isEmpty();
             SQLCallback.PreparedCallback p = batch ?
@@ -239,7 +239,7 @@ public final class SQLAdapter<T> {
      * Execute query on SQLAdapter.
      * @param provider Connection provider
      * @param sql SQL Statement string
-     * @param callback Query callback. Will be executed on query complete, ResultSet is automatically managed on the SQLAdapter side
+     * @param callback Query callback. Will be executed on query complete, ResultSet is managed on SQLAdapter side, don't close
      * @param verbose log failed database execution (will forward exception anyway)
      */
     public static <T> T query(Class<T> ret, ConnectionProvider provider, String sql, SQLCallback<SQLResponse, T> callback, boolean verbose) throws SQLException {
@@ -256,7 +256,7 @@ public final class SQLAdapter<T> {
      * Execute query with PreparedStatement on SQLAdapter.
      * @param provider Connection provider
      * @param sql SQL Statement string
-     * @param callback Query callback. Will be executed on query complete, ResultSet is automatically managed on the SQLAdapter side
+     * @param callback Query callback. Will be executed on query complete, ResultSet is managed on SQLAdapter side, don't close
      * @param setter Value setter callback
      * @param verbose log failed database execution (will forward exception anyway)
      */
