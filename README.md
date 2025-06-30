@@ -1,6 +1,8 @@
 # WholesomeLib
 
-Description will come eventually...
+A library with the code shared between my projects. Being developed for my personal needs, the commits might be not tested (but testing is still welcome :p).  
+
+Has custom collections, Bukkit/Spigot utilities, JDBC/SQL access code, Language support and more
 
 ## Install
 ```bash
@@ -8,7 +10,7 @@ git clone https://github.com/whitebelyash/WholesomeLib
 cd WholesomeLib
 mvn install
 ```
-This should be enough...
+This should be enough.
 
 ## Examples
 ### SQLAdapter (WIP)
