@@ -249,7 +249,7 @@ public final class SQLAdapter<T> {
         } catch (SQLException e){
             if(verbose)
                 handleException(e, sql, provider);
-            throw new SQLException(e);
+            throw e;
         }
     }
     /**
@@ -268,7 +268,7 @@ public final class SQLAdapter<T> {
         } catch (SQLException e){
             if(verbose)
                 handleException(e, sql, provider);
-            throw new SQLException(e);
+            throw e;
         }
     }
     /**
@@ -285,7 +285,7 @@ public final class SQLAdapter<T> {
         } catch (SQLException e){
             if(verbose)
                 handleException(e, sql, provider);
-            throw new SQLException(e);
+            throw e;
         }
     }
     /**
@@ -307,7 +307,7 @@ public final class SQLAdapter<T> {
         } catch (SQLException e){
             if(verbose)
                 handleException(e, sql, provider);
-            throw new SQLException(e);
+            throw e;
         }
     }
 
