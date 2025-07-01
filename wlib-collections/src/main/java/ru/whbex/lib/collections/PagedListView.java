@@ -10,11 +10,11 @@ import java.util.List;
  */
 // TODO: Improve docs
 public class PagedListView<E> {
-    private final static short PAGE_SIZE = 10;
+    private final static short DEF_PAGE_SIZE = 10;
     private final short pageSize;
     private final List<E> list;
     public PagedListView(List<E> list){
-        this(list, PAGE_SIZE);
+        this(list, DEF_PAGE_SIZE);
     }
     public PagedListView(List<E> list, short pageSize){
         this.pageSize = pageSize;
@@ -37,7 +37,7 @@ public class PagedListView<E> {
     public int pageAmount(){
         if(list.isEmpty())
             return 0;
-        return list.size() % PAGE_SIZE != 0 ? list.size() / PAGE_SIZE + 1 : list.size() / PAGE_SIZE;
+        return list.size() % pageSize != 0 ? list.size() / pageSize + 1 : list.size() / pageSize;
     }
 
     /**
@@ -54,13 +54,13 @@ public class PagedListView<E> {
             throw new ArrayIndexOutOfBoundsException("Page index " + pageIndex + "out of bounds");
         // start index
        // int si = (pageIndex - 1 == 0 ? 1 : (pageIndex - 1) * PAGE_SIZE) - 1; wtf lol
-        int si = (pageIndex - 1) * PAGE_SIZE;
+        int si = (pageIndex - 1) * pageSize;
         // end index
        // int ei = (si + PAGE_SIZE) - pageIndex == pageAmount ? (PAGE_SIZE * pageAmount() - size()) : 0;
-        int ei = si + PAGE_SIZE;
+        int ei = si + pageSize;
         // check for last page fullness
-        if(pageIndex == pageAmount && size() != pageAmount * PAGE_SIZE)
-            ei = ei - (pageAmount * PAGE_SIZE - size());
+        if(pageIndex == pageAmount && size() != pageAmount * pageSize)
+            ei = ei - (pageAmount * pageSize - size());
         return list.subList(si, ei);
     }
 }
