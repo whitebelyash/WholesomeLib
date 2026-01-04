@@ -9,8 +9,8 @@ import java.util.stream.Stream;
 // Source: [IDontKnow] ru.whbex.develop.idontknow.util
 
 /**
- * Read only view of Set as List object.
- * NOTE: can break something if real list expected. Use with caution
+ * View of Set as a List object.
+ * NOTE: can break something if a real list is expected. Use with caution
  * @param <T> List element type
  */
 public class SetListView<T> implements List<T> {
