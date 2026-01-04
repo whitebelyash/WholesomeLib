@@ -9,4 +9,14 @@ package ru.whbex.lib.sql.conn;
  * @param dbUser database user
  * @param dbPassword database password
  */
-public record ConnectionConfig(String dbName, String dbAddress, String dbUser, String dbPassword) {}
+public record ConnectionConfig(String dbName, String dbAddress, String dbUser, String dbPassword) {
+    @Override
+    public String toString() {
+        return "ConnectionConfig{" +
+                "dbName='" + dbName + '\'' +
+                ", dbAddress='" + dbAddress + '\'' +
+                ", dbUser='" + dbUser + '\'' +
+                ", dbPassword='" + "<stripped>" + '\'' +
+                '}';
+    }
+}
