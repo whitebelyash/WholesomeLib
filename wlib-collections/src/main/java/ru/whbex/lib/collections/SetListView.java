@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 // Source: [IDontKnow] ru.whbex.develop.idontknow.util
 
 /**
- * View of Set as a List object.
+ * View of Set as a List object
  * NOTE: can break something if a real list is expected. Use with caution
  * @param <T> List element type
  */
