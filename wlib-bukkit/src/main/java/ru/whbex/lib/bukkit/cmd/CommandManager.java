@@ -35,4 +35,21 @@ public class CommandManager {
     public static void dispatchCommand(CommandSender sender, String command) {
         commandMap.dispatch(sender, command);
     }
+
+    public static class ChainedRegister {
+        private final String prefix;
+
+        public ChainedRegister(String prefix){
+            this.prefix = prefix;
+        }
+        public ChainedRegister register(StubCommand command){
+            CommandManager.registerCommand(prefix, command);
+            return this;
+        }
+        public ChainedRegister register(String name, CommandExecutor executor){
+            CommandManager.registerCommand(prefix, name, executor);
+            return this;
+        }
+        // More will come
+    }
 }
