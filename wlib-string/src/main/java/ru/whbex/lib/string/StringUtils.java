@@ -63,6 +63,13 @@ public class StringUtils {
             return new SimpleDateFormat().format(date);
         }
     }
+
+    /**
+     * Convert a string to int with a fallback
+     * @param s string to convert
+     * @param fallback fallback integer
+     * @return decoded integer
+     */
     public static int parseInt(String s, int fallback){
         try {
             return Integer.parseInt(s);
