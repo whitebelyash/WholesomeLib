@@ -4,30 +4,35 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.*;
 import ru.whbex.lib.reflect.ReflectUtils;
 
+import java.lang.reflect.Field;
 import java.util.List;
 
 public class CommandManager {
 
-    private static final String COMMAND_MAP_NAME = "commandMap";
+    private static final CommandMap commandMap;
+    public static final String FALLBACK_PREFIX = "changeme";
 
-
-    public static void registerCommand(String prefix,Command command){
+    static {
         try {
             // Can break if bukkit/paper devs change this map name
             // I DO hate Bukkit
-            CommandMap cmdMap = ReflectUtils.getDeclField(Bukkit.getServer(), COMMAND_MAP_NAME);
-            cmdMap.register(prefix, command);
-        // TODO: Properly handle exceptions here
+            commandMap = ReflectUtils.getDeclField(Bukkit.getServer(), "commandMap");
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
     }
+
+    public static void registerCommand(String prefix,Command command){
+        commandMap.register(prefix, command);
+    }
+    public static void registerCommand(String prefix, String name, CommandExecutor executor){
+        StubCommand sc = new StubCommand(name, executor);
+        commandMap.register(prefix, sc);
+    }
     public static void registerCommand(String prefix, List<Command> commands){
-        try {
-            CommandMap cmdMap = ReflectUtils.getDeclField(Bukkit.getServer(), COMMAND_MAP_NAME);
-            cmdMap.registerAll(prefix, commands);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
+        commandMap.registerAll(prefix, commands);
+    }
+    public static void dispatchCommand(CommandSender sender, String command) {
+        commandMap.dispatch(sender, command);
     }
 }
